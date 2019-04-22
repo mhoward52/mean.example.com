@@ -8,6 +8,9 @@ var mongoose = require('mongoose');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
 var passport = require('passport');
+var LocalStrategy = require('passport-local').Strategy;
+var Users = require('./models/users');
+
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -49,6 +52,7 @@ app.use(passport.session());
 
 app.use('/', indexRouter);
 app.use('/api/users', apiUsersRouter);
+passport.use(Users.createStrategy());
 
 //Connect to MongoDB
 mongoose.connect(config.mongodb, {
