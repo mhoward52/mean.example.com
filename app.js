@@ -21,7 +21,9 @@ app.set('view engine', 'pug');
 
 app.use(logger('dev'));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({
+  extended: false
+}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -39,7 +41,7 @@ app.use(require('express-session')({
     domain: config.cookie.domain,
     //httpOnly: true,
     //secure: true,
-    maxAge:3600000 //1 hour
+    maxAge: 3600000 //1 hour
   }
 }));
 app.use(passport.initialize());
@@ -49,15 +51,31 @@ app.use('/', indexRouter);
 app.use('/api/users', apiUsersRouter);
 
 //Connect to MongoDB
-mongoose.connect(config.mongodb, { useNewUrlParser: true });
+mongoose.connect(config.mongodb, {
+  useNewUrlParser: true
+})
+
+passport.serializeUser(function (user, done) {
+  done(null, {
+    id: user._id,
+    username: user.username,
+    email: user.email,
+    first_name: user.first_name,
+    last_name: user.last_name
+  });
+});
+
+passport.deserializeUser(function (user, done) {
+  done(null, user);
+});;
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
   next(createError(404));
 });
 
 // error handler
-app.use(function(err, req, res, next) {
+app.use(function (err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
