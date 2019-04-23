@@ -73,6 +73,10 @@ passport.serializeUser(function (user, done) {
 
 app.use('/api/auth', apiAuthRouter);
 app.use('/auth', authRouter);
+app.use(function(req,res,next){
+  res.locals.session = req.session;
+  next();
+});
 
 
 passport.deserializeUser(function (user, done) {
