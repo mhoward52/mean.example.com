@@ -13,7 +13,8 @@ gulp.task('default', ['watch']);
 //Compile all JS tasks
 gulp.task('build-js', [
   'build-main-js',
-  'build-auth-js'
+  'build-auth-js',
+  'build-users-js'
 ]);
 
 //Compile all CSS tasks
@@ -57,8 +58,22 @@ gulp.task('build-auth-js', function () {
   return merge(authApp);
 });
 
+gulp.task('build-users-js', function () {
+
+  var userApp = gulp.src([
+      'src/js/users.app.js',
+    ])
+    .pipe(concat('users.app.min.js'))
+    .pipe(uglify())
+    .pipe(gulp.dest('public/dist/js'));
+
+  return merge(userApp);
+});
+
 //Recompile SCSS/JS on save
 gulp.task('watch', function () {
   gulp.watch('./src/scss/**/*.scss', ['build-css']);
   gulp.watch('./src/js/**/*.js', ['build-js']);
+  gulp.watch('./routes/**/*.js', ['build-users-js']);
+
 });

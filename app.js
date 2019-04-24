@@ -7,8 +7,8 @@ var config = require('./config.dev');
 var mongoose = require('mongoose');
 var session = require('express-session');
 var MongoStore = require('connect-mongo')(session);
-var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
+var passport = require('passport');
 var Users = require('./models/users');
 
 var authRouter = require('./routes/auth');
@@ -16,8 +16,6 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var apiUsersRouter = require('./routes/api/users');
 var apiAuthRouter = require('./routes/api/auth');
-
-
 var app = express();
 
 // view engine setup
@@ -52,15 +50,12 @@ app.use(require('express-session')({
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/', indexRouter);
-app.use('/api/users', apiUsersRouter);
-passport.use(Users.createStrategy());
-
 //Connect to MongoDB
 mongoose.connect(config.mongodb, {
   useNewUrlParser: true
-})
+});
 
+passport.use(Users.createStrategy());
 passport.serializeUser(function (user, done) {
   done(null, {
     id: user._id,
@@ -71,17 +66,74 @@ passport.serializeUser(function (user, done) {
   });
 });
 
-app.use('/api/auth', apiAuthRouter);
-app.use('/auth', authRouter);
-app.use(function(req,res,next){
+passport.deserializeUser(function (user, done) {
+  done(null, user);
+});
+
+app.use(function (req, res, next) {
   res.locals.session = req.session;
+
+  res.locals.showLogin = true;
+  if (req.session.passport) {
+    if (req.session.passport.user) {
+      res.locals.showLogin = false;
+    }
+  }
   next();
 });
 
+//Session based access control
+app.use(function (req, res, next) {
+  //Uncomment the following line to allow access to everything.
+  return next();
 
-passport.deserializeUser(function (user, done) {
-  done(null, user);
-});;
+  //Allow any endpoint that is an exact match. The server does not
+  //have access to the hash so /auth and /auth#xxx would bot be considered
+  //exact matches.
+  var whitelist = [
+    '/',
+    '/auth'
+  ];
+
+  //req.url holds the current URL
+  //indexOf() returns the index of the matching array element
+  //-1, in this context means not found in the array
+  //so if NOT -1 means is found in the whitelist
+  //return next(); stops execution and grants access
+  if (whitelist.indexOf(req.url) !== -1) {
+    return next();
+  }
+
+  //Allow access to dynamic end points
+  var subs = [
+    '/public/',
+    '/api/auth/'
+  ];
+
+  //The query string provides a partial URL match beginning
+  //at position 0. Both /api/auth/login and /api/auth/logout would would
+  //be considered a match for /api/auth/
+  for (var sub of subs) {
+    if (req.url.substring(0, sub.length) === sub) {
+      return next();
+    }
+  }
+
+  //There is an active user session, allow access to all endpoints.
+  if (req.isAuthenticated()) {
+    return next();
+  }
+
+  //There is no session nor are there any whitelist matches. Deny access and
+  //redirect the user to the login screen.
+  return res.redirect('/auth#login');
+});
+
+app.use('/', indexRouter);
+app.use('/api/users', apiUsersRouter);
+app.use('/api/auth', apiAuthRouter);
+app.use('/auth', authRouter);
+app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
