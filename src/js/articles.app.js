@@ -51,7 +51,7 @@ var articlesApp = (function() {
               <thead>
                 <tr>
                   <td>Title</td>
-                  <td>description</td>
+                  <td>Dsescription</td>
                   <td>Published</td>
                 </tr>
               </thead>
@@ -66,11 +66,38 @@ var articlesApp = (function() {
     }
   
     return {
-      load: function(){
-        viewArticles();
+        load: function(){
+          let hash = window.location.hash;
+          let hashArray = hash.split('-');
+    
+          switch(hashArray[0]){
+            case '#create':
+              console.log('CREATE');
+              break;
+    
+            case '#view':
+              console.log('VIEW');
+              break;
+    
+            case '#edit':
+              console.log('EDIT');
+              break;
+    
+            case '#delete':
+              console.log('DELETE');
+              break;
+    
+            default:
+              viewUsers();
+              break;
+          }
+        }
       }
-    }
-  
+      
   })();
   
   articlesApp.load();
+
+  window.addEventListener("hashchange", function(){
+    articlesApp.load();
+  });
