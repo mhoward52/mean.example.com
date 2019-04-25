@@ -10,7 +10,7 @@ var MongoStore = require('connect-mongo')(session);
 var LocalStrategy = require('passport-local').Strategy;
 var passport = require('passport');
 var Users = require('./models/users');
-//var articles = require('./models/articles');
+var Articles = require('./models/articles');
 
 var authRouter = require('./routes/auth');
 var indexRouter = require('./routes/index');
@@ -96,7 +96,8 @@ app.use(function (req, res, next) {
   //exact matches.
   var whitelist = [
     '/',
-    '/auth'
+    '/auth',
+    '/articles'
   ];
 
   //req.url holds the current URL
@@ -111,7 +112,8 @@ app.use(function (req, res, next) {
   //Allow access to dynamic end points
   var subs = [
     '/public/',
-    '/api/auth/'
+    '/api/auth/',
+    '/api/articles'
   ];
 
   //The query string provides a partial URL match beginning
