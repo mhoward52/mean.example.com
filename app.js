@@ -17,7 +17,7 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var articlesRouter = require('./routes/articles');
 var apiUsersRouter = require('./routes/api/users');
-//var apiArticlesRouter = require('./routes/api/articles');
+var apiArticlesRouter = require('./routes/api/articles');
 var apiAuthRouter = require('./routes/api/auth');
 var app = express();
 
@@ -136,7 +136,7 @@ app.use(function (req, res, next) {
 app.use('/articles', articlesRouter);
 app.use('/', indexRouter);
 app.use('/api/users', apiUsersRouter);
-//app.use('/api/articles', apiArticlesRouter);
+app.use('/api/articles', apiArticlesRouter);
 app.use('/api/auth', apiAuthRouter);
 app.use('/auth', authRouter);
 app.use('/users', usersRouter);
