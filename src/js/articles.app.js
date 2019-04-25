@@ -64,7 +64,76 @@ var articlesApp = (function() {
         app.innerHTML = table;
       }
     }
-  
+
+    function createArticle() {
+        var app = document.getElementById('app');
+    
+        var form = `
+        <div class="card">
+            <div class="card-header clearfix">
+            <h2 class="h3 float-left">Create a New Article</h2>
+            <div class="float-right">
+                <a href="#" class="btn btn-primary">Cancel</a>
+            </div>
+            </div>
+            <div class="card-body">
+            <form id="createArticle" class="card-body">
+                <div id="formMsg" class="alert alert-danger text-center">Your form has errors</div>
+    
+                <div class="row">
+                <div class="form-group col-md-6">
+                    <label for="title">Title</label>
+                    <input type="text" id="title" name="title" class="form-control" required>
+                </div>
+    
+                <div class="form-group col-md-6">
+                    <label for="description">Description</label>
+                    <input type="text" id="description" name="description" class="form-control" required>
+                </div>
+                </div>    
+                <div class="text-right">
+                <input type="submit" value="Submit" class="btn btn-lg btn-primary btn-sm-block">
+                </div>
+            </form>
+            </div>
+        </div>
+    `;
+    
+        app.innerHTML = form;
+    }
+    
+    function processRequest(formId, url, method) {
+        let form = document.getElementById(formId);
+        form.addEventListener('submit', function (e) {
+          e.preventDefault();
+    
+          let formData = new FormData(form);
+          let uri = `${window.location.origin}${url}`;
+          let xhr = new XMLHttpRequest();
+          xhr.open(method, uri);
+    
+          xhr.setRequestHeader(
+            'Content-Type',
+            'application/json; charset=UTF-8'
+          );
+    
+          let object = {};
+          formData.forEach(function (value, key) {
+            object[key] = value;
+          });
+    
+          xhr.send(JSON.stringify(object));
+          xhr.onload = function () {
+            let data = JSON.parse(xhr.response);
+            if (data.success === true) {
+              window.location.href = '/';
+            } else {
+              document.getElementById('formMsg').style.display = 'block';
+            }
+          }
+        });
+    }
+    
     return {
         load: function(){
           let hash = window.location.hash;
@@ -72,7 +141,9 @@ var articlesApp = (function() {
     
           switch(hashArray[0]){
             case '#create':
-              console.log('CREATE');
+              createArticle();
+              processRequest('createArticle', '/api/articles', 'POST');
+
               break;
     
             case '#view':
@@ -88,11 +159,11 @@ var articlesApp = (function() {
               break;
     
             default:
-              viewUsers();
+              viewArticles();
               break;
           }
         }
-      }
+    }
       
   })();
   
