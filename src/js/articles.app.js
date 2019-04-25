@@ -135,6 +135,63 @@ var articlesApp = (function() {
           app.innerHTML = card;
         }
     }
+    function editArticle(slug) {
+
+        let uri = `${window.location.origin}/api/articles/${slug}`;
+        let xhr = new XMLHttpRequest();
+        xhr.open('GET', uri);
+    
+        xhr.setRequestHeader(
+          'Content-Type',
+          'application/json; charset=UTF-8'
+        );
+    
+        xhr.send();
+    
+        xhr.onload = function () {
+          let app = document.getElementById('app');
+          let data = JSON.parse(xhr.response);
+    
+          var form = `
+                <div class="card">
+                <div class="card-header clearfix">
+                    <h2 class="h3 float-left">Edit</h2>
+                    <div class="float-right">
+                    <a href="#" class="btn btn-primary">Cancel</a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form id="editArticle" class="card-body">
+                    <input type="hidden" id="slug" name="_id" value="${data.article.slug}">
+                    <div id="formMsg" class="alert alert-danger text-center">Your form has errors</div>
+            
+                    <div class="row">
+                        <div class="form-group col-md-6">
+                        <label for="first_name">Title</label>
+                        <input type="text" id="title" name="title" class="form-control" value="${data.article.title}" required>
+                        </div>
+            
+                        <div class="form-group col-md-6">
+                        <label for="description">Description</label>
+                        <input type="text" id="description" name="description" class="form-control" value="${data.article.description}" required>
+                        </div>
+                    </div>
+            
+                    <div class="text-right">
+                        <input type="submit" value="Submit" class="btn btn-lg btn-primary btn-sm-block">
+                    </div>
+                    </form>
+                    </div>
+                </div>
+                <div>
+                <a href="#delete-${data.article._id}" class="text-danger">Delete</a>
+                </div>
+                `;
+    
+          app.innerHTML = form;
+          processRequest('editArticle', '/api/articles', 'PUT');
+        }
+      }
     
     function processRequest(formId, url, method) {
         let form = document.getElementById(formId);
@@ -185,8 +242,8 @@ var articlesApp = (function() {
             break;
     
             case '#edit':
-              console.log('EDIT');
-              break;
+            editArticle(hashArray[1]);
+            break;
     
             case '#delete':
               console.log('DELETE');
